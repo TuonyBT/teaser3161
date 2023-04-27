@@ -1,4 +1,5 @@
 use itertools::Itertools;
+use std::collections::{BTreeSet};
 
 const COLS: [&str; 4] = ["blue", "black", "red", "yellow"];
 
@@ -8,19 +9,20 @@ fn main() {
                         .filter(|perm| perm.into_iter().position(|&col| col == "blue").unwrap() < perm.into_iter().position(|&col| col == "black").unwrap())
                         .collect::<Vec<Vec<&str>>>();
     
+    let mut adj_pairs = BTreeSet::<[Vec<&str>; 2]>::new();
+
     for ball_order in ball_orders.iter() {
-        println!("Ball order {:?}", ball_order);
-        println!("Ball swaps {:?}", ball_swap(ball_order.to_owned()));
-        println!();
+        adj_pairs.extend(ball_swap(ball_order.to_owned()));
     }
+    println!("Neighbour pairs {:?}", adj_pairs);
     
 
 
 }
 
-fn ball_swap(fr: Vec<&str>) -> Vec<Vec<&str>> {
+fn ball_swap(fr: Vec<&str>) -> BTreeSet::<[Vec<&str>; 2]> {
 
-    let mut out = Vec::<Vec<&str>>::new();
+    let mut adj_pair = BTreeSet::<[Vec<&str>; 2]>::new();
 
     for (id, ball) in fr.iter().enumerate() {
         for (idx, swap) in fr[id + 1..].iter().enumerate() {
@@ -28,10 +30,9 @@ fn ball_swap(fr: Vec<&str>) -> Vec<Vec<&str>> {
             let mut new = fr.clone();
             new[id] = swap;
             new[id + idx + 1] = ball;
-            out.push(new);
-
+            adj_pair.insert([fr.clone(), new.clone()]);
         }
     }
 
-    out
+    adj_pair
 }
