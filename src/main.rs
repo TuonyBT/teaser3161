@@ -5,6 +5,8 @@ const COLS: [&str; 4] = ["blue", "black", "red", "yellow"];
 
 fn main() {
 
+    let mut valid_paths = Vec::<Vec<&Vec<&str>>>::new();
+
     let ball_orders = COLS.into_iter().permutations(4).to_owned()
                         .filter(|perm| perm.into_iter().position(|&col| col == "blue").unwrap() < perm.into_iter().position(|&col| col == "black").unwrap())
                         .collect::<Vec<Vec<&str>>>();
@@ -40,15 +42,35 @@ fn main() {
             new_edges = full_paths.to_owned();
             
             if pass == 11 && full_paths.len() > 0 {    
-                println!("Node {:?}", node);
-                println!("New edges found on pass {}: {:?}", pass, full_paths);
+//                println!("Node {:?}", node);
+//                println!("New edges found on pass {}: {:?}", pass, full_paths);
 //                println!("New edges found on pass {}: {:?}", pass, full_paths.iter().map(|z| z.len()).collect::<Vec<usize>>());
-                println!();
+//                println!();
+                valid_paths.extend(full_paths);
             }
         }
 
     }
+    for p in valid_paths {
+        for col in COLS {
+            let before_yellow = p.iter()
+            .map(|z| z.iter().position(|c| c == &col) < z.iter().position(|c| c == &"yellow"))
+            .collect::<Vec<bool>>();
 
+            if before_yellow[0] == false {continue}
+            
+            let crossovers = before_yellow[1..].into_iter().enumerate()
+            .map(|(idx, &val)| before_yellow[idx] == val)
+            .filter(|&b| b == false)
+            .count();
+            if crossovers == 1 {
+                println!("Unique sequence matching solution {:?}", p);
+                println!();
+                println!("Colour referred to in puzzle is {}. Last hoop order {:?}", col, p.last().unwrap());
+            }
+        }
+
+    }
 }
 
 fn edges<'a>(seq: Vec<&'a Vec<&str>>, nbrs: &'a BTreeSet<Vec<&str>>) -> Vec<Vec<&'a Vec<&'a str>>> {
